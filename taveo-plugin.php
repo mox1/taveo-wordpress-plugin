@@ -59,10 +59,50 @@ define ('TAVEO_SSL_VERIFY', false);
 require( TAVEO_PLUGIN_DIR_PATH . '/includes/config_screen.php' );
 require( TAVEO_PLUGIN_DIR_PATH . '/includes/add_to_taveo.php' );
 
-/*Add all of our actions */
-add_action('admin_menu', 'taveo_create_options_page');
-add_action('admin_enqueue_scripts', 'taveo_enqueue_admin_js' );
+
+
 add_action('init', 'get_pagepost_url' );
+
+
+function taveo_on_activation()
+{
+    if ( ! current_user_can( 'activate_plugins' ) )
+        return;
+    $plugin = isset( $_REQUEST['plugin'] ) ? $_REQUEST['plugin'] : '';
+    check_admin_referer( "activate-plugin_{$plugin}" );
+
+    
+}
+
+function taveo_on_deactivation()
+{
+    if ( ! current_user_can( 'activate_plugins' ) )
+        return;
+    $plugin = isset( $_REQUEST['plugin'] ) ? $_REQUEST['plugin'] : '';
+    check_admin_referer( "deactivate-plugin_{$plugin}" );
+
+   
+}
+
+function taveo_on_uninstall()
+{
+    if ( ! current_user_can( 'activate_plugins' ) )
+        return;
+    check_admin_referer( 'bulk-plugins' );
+
+    // Important: Check if the file is the one
+    // that was registered during the uninstall hook.
+    if ( __FILE__ != WP_UNINSTALL_PLUGIN )
+        return;
+
+    delete_option('taveo_api_key');
+
+   
+}
+
+register_activation_hook(__FILE__, 'taveo_on_activation' );
+register_deactivation_hook(__FILE__, 'taveo_on_deactivation' );
+register_uninstall_hook(__FILE__, 'taveo_on_uninstall' );
 
 
 
@@ -72,6 +112,9 @@ function taveo_create_options_page() {
 	add_action( 'load-' . $my_page, 'taveo_load_enqueue_scripts' );
 
 }
+
+add_action('admin_menu', 'taveo_create_options_page');
+
 function taveo_load_enqueue_scripts(){
 	// Unfortunately we can't just enqueue our scripts here - it's too early. So register against the proper action hook to do it
 	add_action( 'admin_enqueue_scripts', 'taveo_style' );
@@ -99,7 +142,7 @@ function taveo_enqueue_admin_js(){
         'api_key_url' => $data
     ) );
 }
-
+add_action('admin_enqueue_scripts', 'taveo_enqueue_admin_js' );
 
 
 /*this function gets added by the "init" hook, so it is available everywhere*/
