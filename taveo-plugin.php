@@ -46,6 +46,7 @@ define( 'TAVEO_PLUGIN_VERSION', '1.0' );
 
 define( 'TAVEO_API_CREATE_URL',  'https://api.taveo.net/1/create' );
 define( 'TAVEO_API_OVERVIEW_URL',  'https://api.taveo.net/1/overview' );
+define( 'TAVEO_API_BYDEST_URL',  'https://api.taveo.net/1/links/bydest' );
 
 // Verify SSL requests 
 // Set to false during testing , true in production
@@ -106,28 +107,37 @@ register_uninstall_hook(__FILE__, 'taveo_on_uninstall' );
 
 
 
-function taveo_create_options_page() { 
-	$my_page=add_menu_page( 'Taveo','Taveo'  ,'manage_options','taveo_dashboard',
+add_action('admin_init', 'taveo_admin_init');
+add_action('admin_menu', 'taveo_admin_menu');
+
+function taveo_admin_init() {
+	wp_register_style('TaveoOptionsCSS',plugins_url( '/css/config_screen.css', __FILE__ ),array(),TAVEO_PLUGIN_VERSION);
+	wp_register_script('TaveoOptionsJS',plugins_url( '/js/config_screen.js', __FILE__ ), array( 'jquery' ), TAVEO_PLUGIN_VERSION, true );
+}
+
+function taveo_admin_menu() { 
+	$my_page=add_menu_page( 'Taveo','Taveo' ,'manage_options','taveo_dashboard',
 							'taveo_build_config_screen', plugin_dir_url( __FILE__ ) . 'includes/images/icon16.png' );
-	add_action( 'load-' . $my_page, 'taveo_load_enqueue_scripts' );
-
+	add_action('admin_print_styles-' . $my_page, 'taveo_admin_styles');
 }
 
-add_action('admin_menu', 'taveo_create_options_page');
-
-function taveo_load_enqueue_scripts(){
-	// Unfortunately we can't just enqueue our scripts here - it's too early. So register against the proper action hook to do it
-	add_action( 'admin_enqueue_scripts', 'taveo_style' );
-}
-
-function taveo_style(){
-	wp_enqueue_style( 'config_screen', plugins_url( '/css/config_screen.css', __FILE__ ) );
+function taveo_admin_styles() {
+/*
+ * It will be called only on your plugin admin page, enqueue our stylesheet here
+ */
+	wp_enqueue_style( 'TaveoOptionsCSS' );
+	wp_enqueue_script('TaveoOptionsJS');
 }
 
 
-/*this function adds the Taveo button to every page and post */ 
-function taveo_enqueue_admin_js(){
-	wp_enqueue_script( 'ajax_request', plugins_url( '/js/ajax_request.js', __FILE__ ), array( 'jquery' ), '1.0', true );
+/* load scripts and do things on our options / Dashboard page */
+function taveo_enqueue_admin(){
+	wp_enqueue_script('jquery-ui-dialog');
+	wp_enqueue_script('jq-impromptujs', plugins_url( '/js/jq-impromptu.min.js', __FILE__ ), array( 'jquery','jquery-ui-core' ), TAVEO_PLUGIN_VERSION, true );
+	wp_enqueue_script('TaveoMainJS', plugins_url( '/js/taveo.js', __FILE__ ), array( 'jquery','jquery-ui-core' ), TAVEO_PLUGIN_VERSION, true );
+	wp_enqueue_style('wp-jquery-ui-dialog');
+	wp_enqueue_style('TaveoMainCss',plugins_url( '/css/taveo.css', __FILE__ ),array('wp-jquery-ui-dialog'),TAVEO_PLUGIN_VERSION);
+	wp_enqueue_style('jq-impromptucss',plugins_url( '/css/jq-impromptu.min.css', __FILE__ ),array('wp-jquery-ui-dialog'),TAVEO_PLUGIN_VERSION);
     
 
     $taveo_api_key=get_option( 'taveo_api_key' );
@@ -138,12 +148,36 @@ function taveo_enqueue_admin_js(){
 	), TAVEO_API_CREATE_URL );
 
 
-    wp_localize_script( 'ajax_request', 'taveossdata', array(            
-        'api_key_url' => $data
+    wp_localize_script('TaveoMainJS', 'taveossdata', array(            
+        'api_key_url' => $data,
+        'api_key' => $taveo_api_key,
+        'page_permalink' => get_pagepost_url(),
+        'create_api_url' => TAVEO_API_CREATE_URL,
+        'by_dest_url' => TAVEO_API_BYDEST_URL
     ) );
-}
-add_action('admin_enqueue_scripts', 'taveo_enqueue_admin_js' );
+	
+	//make the thickbox available
+	add_thickbox();
 
+}
+function taveo_add_meta_box() {
+
+	add_meta_box('taveo_meta_links',__( 'Taveo Analytics - Current Links for this page', 'myplugin_textdomain' ),'taveo_metabox_callback','page');
+	add_meta_box('taveo_meta_links',__( 'Taveo Analytics - Current Links for this post', 'myplugin_textdomain' ),'taveo_metabox_callback','post');
+	
+}
+add_action( 'add_meta_boxes', 'taveo_add_meta_box' );
+
+/* this function gets call every time an Admin page loads,
+ * we verify this is a page we are interested in and load our crap here */
+ 
+function taveo_load_stuff($hook) {
+	//Test for "edit post"
+	if ($hook == 'post.php') {
+		taveo_enqueue_admin();   	
+    }	
+}
+add_action('admin_enqueue_scripts', 'taveo_load_stuff');
 
 /*this function gets added by the "init" hook, so it is available everywhere*/
 function get_pagepost_url(){

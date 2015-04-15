@@ -3,7 +3,6 @@
 defined( 'ABSPATH' ) or die( 'Go Away.' );
 
 
-
 add_action( 'admin_post_taveo_api_key_option', 'process_taveo_api_key_option' );
 
 function process_taveo_api_key_option(){
@@ -33,7 +32,7 @@ function process_taveo_api_key_option(){
 //The markup for the plugin settings / dashboard page
 function taveo_build_config_screen(){ ?>
     <div class="wrap clear">
-    <h2>Taveo: Settings</h2>
+    <h2>Taveo: Dashboard</h2>
     <?php
 	  if ( isset( $_GET['settings-updated'] ) && $_GET['settings-updated'] == '1' )
 	  {
@@ -67,7 +66,7 @@ function taveo_build_config_screen(){ ?>
         </table>
 
         
-        <input name="submit" type="submit" class="button-primary" value="<?php esc_attr_e('Save Changes'); ?>" />      </p> 
+        <p><input name="submit" type="submit" class="button-primary" value="<?php esc_attr_e('Save Changes'); ?>" />      </p> 
     	</form>
     	<table class="taveo_table">
         <?php
