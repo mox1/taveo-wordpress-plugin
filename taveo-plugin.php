@@ -47,6 +47,7 @@ define( 'TAVEO_PLUGIN_VERSION', '1.0' );
 define( 'TAVEO_API_CREATE_URL',  'https://api.taveo.net/1/create' );
 define( 'TAVEO_API_OVERVIEW_URL',  'https://api.taveo.net/1/overview' );
 define( 'TAVEO_API_BYDEST_URL',  'https://api.taveo.net/1/links/bydest' );
+define( 'TAVEO_API_LINKS_URL',  'https://api.taveo.net/1/links/all' );
 
 // Verify SSL requests 
 // Set to false during testing , true in production
@@ -112,7 +113,10 @@ add_action('admin_menu', 'taveo_admin_menu');
 
 function taveo_admin_init() {
 	wp_register_style('TaveoOptionsCSS',plugins_url( '/css/config_screen.css', __FILE__ ),array(),TAVEO_PLUGIN_VERSION);
-	wp_register_script('TaveoOptionsJS',plugins_url( '/js/config_screen.js', __FILE__ ), array( 'jquery' ), TAVEO_PLUGIN_VERSION, true );
+	wp_register_style('jq-datatablescss',plugins_url( '/css/jq-datatables.css', __FILE__ ),array('wp-jquery-ui-dialog'),TAVEO_PLUGIN_VERSION);
+	wp_register_script('jq-datatablesjs', plugins_url( '/js/jq-datatables.js', __FILE__ ), array( 'jquery'), TAVEO_PLUGIN_VERSION, true );	
+	wp_register_script('TaveoOptionsJS',plugins_url( '/js/config_screen.js', __FILE__ ), array( 'jquery', 'jq-datatablesjs' ), TAVEO_PLUGIN_VERSION, true );
+
 }
 
 function taveo_admin_menu() { 
@@ -125,7 +129,9 @@ function taveo_admin_styles() {
 /*
  * It will be called only on your plugin admin page, enqueue our stylesheet here
  */
+ 	wp_enqueue_style( 'jq-datatablescss' );
 	wp_enqueue_style( 'TaveoOptionsCSS' );
+	wp_enqueue_script('jq-datatablesjs');
 	wp_enqueue_script('TaveoOptionsJS');
 }
 
@@ -134,10 +140,12 @@ function taveo_admin_styles() {
 function taveo_enqueue_admin(){
 	wp_enqueue_script('jquery-ui-dialog');
 	wp_enqueue_script('jq-impromptujs', plugins_url( '/js/jq-impromptu.min.js', __FILE__ ), array( 'jquery','jquery-ui-core' ), TAVEO_PLUGIN_VERSION, true );
+	wp_enqueue_script('jq-datatablesjs', plugins_url( '/js/jq-datatables.js', __FILE__ ), array( 'jquery'), TAVEO_PLUGIN_VERSION, true );
 	wp_enqueue_script('TaveoMainJS', plugins_url( '/js/taveo.js', __FILE__ ), array( 'jquery','jquery-ui-core' ), TAVEO_PLUGIN_VERSION, true );
 	wp_enqueue_style('wp-jquery-ui-dialog');
-	wp_enqueue_style('TaveoMainCss',plugins_url( '/css/taveo.css', __FILE__ ),array('wp-jquery-ui-dialog'),TAVEO_PLUGIN_VERSION);
 	wp_enqueue_style('jq-impromptucss',plugins_url( '/css/jq-impromptu.min.css', __FILE__ ),array('wp-jquery-ui-dialog'),TAVEO_PLUGIN_VERSION);
+	wp_enqueue_style('jq-datatablescss',plugins_url( '/css/jq-datatables.css', __FILE__ ),array('wp-jquery-ui-dialog'),TAVEO_PLUGIN_VERSION);
+	wp_enqueue_style('TaveoMainCss',plugins_url( '/css/taveo.css', __FILE__ ),array('wp-jquery-ui-dialog'),TAVEO_PLUGIN_VERSION);
     
 
     $taveo_api_key=get_option( 'taveo_api_key' );

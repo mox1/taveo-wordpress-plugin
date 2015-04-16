@@ -30,9 +30,14 @@ function process_taveo_api_key_option(){
 
 
 //The markup for the plugin settings / dashboard page
-function taveo_build_config_screen(){ ?>
-    <div class="wrap clear">
+function taveo_build_config_screen(){ 
+    //get the older values, wont work the first time
+    $options = get_option( 'taveo_api_key' );
+	?>
+	<div class="dashboard">
     <h2>Taveo: Dashboard</h2>
+ 
+
     <?php
 	  if ( isset( $_GET['settings-updated'] ) && $_GET['settings-updated'] == '1' )
 	  {
@@ -40,90 +45,169 @@ function taveo_build_config_screen(){ ?>
 	   <div id='message' class='updated fade'><p><strong>Settings Successfully Saved</strong></p></div>
 	<?php
 	  }
-?>	<div class="container left">
-	<p> Enter your Taveo API key below. Your Taveo API key can be found on your "Account" page in the Taveo Admin portal.<br> 
-		<a href="https://admin.taveo.net/login?nxt=/account" target="_blank">Click here to view your Taveo Account</a><br>
+?>
+  <div id="wrapper">	
+	  <div class="container block1">
+		<p> Enter your Taveo API key below. Your Taveo API key can be found on your "Account" page in the Taveo Admin portal.<br> 
+			<a href="https://admin.taveo.net/login?nxt=/account" target="_blank">Click here to view your Taveo Account</a><br>
 		</p>
-    <form action="admin-post.php" method="post" >
-    	<input type="hidden" name="action" value="taveo_api_key_option" />
-    	<?php wp_nonce_field('taveo_verify','taveo_dash_nonce'); ?>
-    	<?php
-        //get the older values, wont work the first time
-        $options = get_option( 'taveo_api_key' ); ?>
-        <table class="form-table">
-            <tr>
-                <th scope="row">API Key :</th>
-                <td>
-                    <fieldset>
-                        <label>
-                            <input size="30" placeholder="Please enter your API Key" class="taveotextinput" name="taveo_api_key" type="text" id="taveo_api_key" value="<?php echo (isset($options) && $options != '') ? $options : ''; ?>"/>
-                            
-                            
-                        </label>
-                    </fieldset>
-                </td>
-            </tr>
-        </table>
+		<?php
+		if ( empty($options)) {
+			echo '<h4>Don\'t have a Taveo account? <a href="https://admin.taveo.net/register">Create one for FREE.</a></h4>';
+		}?>
+	    <form action="admin-post.php" method="post" >
+			<input type="hidden" name="action" value="taveo_api_key_option" />
+			<?php wp_nonce_field('taveo_verify','taveo_dash_nonce'); ?>
 
-        
-        <p><input name="submit" type="submit" class="button-primary" value="<?php esc_attr_e('Save Changes'); ?>" />      </p> 
-    	</form>
-    	<table class="taveo_table">
-        <?php
-    	if ( !empty( $options )) {
-    		//make request to Taveo API server and get response
-			$response = wp_remote_get( add_query_arg( array(
-	    								'apikey' => $options), TAVEO_API_OVERVIEW_URL ), array('sslverify' => TAVEO_SSL_VERIFY) );
-			$rcode = wp_remote_retrieve_response_code( $response );
-			$overview = json_decode( wp_remote_retrieve_body( $response ), true );
-			if (!(200 ==  $rcode) ) {
-			    //Error, print what happened
-			    ?>
-			    <th scope="row">Received Error from Taveo Server: <?php echo $overview['msg']; ?></th>
-				<?php
+		    <table class="form-table">
+		        <tr>
+		            <th scope="row">API Key :</th>
+		            <td>
+		                <fieldset>
+		                    <label>
+		                        <input size="30" placeholder="Please enter your API Key" class="taveotextinput" name="taveo_api_key" type="text" id="taveo_api_key" value="<?php echo (isset($options) && $options != '') ? $options : ''; ?>"/>
+		                        
+		                        
+		                    </label>
+		                </fieldset>
+		            </td>
+		        </tr>
+		    </table>
+		    
+		    <input name="submit" type="submit" class="button-primary" value="<?php esc_attr_e('Save Changes'); ?>" /> 
+		</form>	   
+		<hr> 
+		<h2 class="text-center"> Your Taveo Link's </h2>
+		<table id="taveo_links" class="display" cellspacing="0">
+			<thead>
+		        <tr>
+		            <th>URL</th>
+		            <th>Destination</th>
+		            <th>Last Click</th>
+		            <th></th>
+		            <th>Total Clicks</th>
+		            <th>Comment</th>
+		        </tr>
+	    	</thead>
+			<tfoot>
+		        <tr>
+		            <th>URL</th>
+		            <th>Destination</th>
+		            <th>Last Click</th>
+		            <th></th>
+		            <th>Total Clicks</th>
+		            <th>Comment</th>
+		        </tr>
+	    	</tfoot>    	
+	    	<tbody>
+		
+	   	<?php
+	    	//add taveo link data
+			if ( !empty( $options )) {
+				//make request to Taveo API server and get response
+				$response = wp_remote_get( add_query_arg( array(
+		    								'apikey' => $options), TAVEO_API_LINKS_URL ), array('sslverify' => TAVEO_SSL_VERIFY) );
+				$rcode = wp_remote_retrieve_response_code( $response );
+				$overview = json_decode( wp_remote_retrieve_body( $response ), true );
+				if (!(200 ==  $rcode) ) {
+				    //Error, print what happened
+				    ?>
+				    <tr><td scope="row">Received Error from Taveo Server: <?php echo $overview['msg']; ?></tr></td>
+				    <tr style="display:none;">error</tr>
+					<?php
+				}
+				//non error, show data
+				else if(($rcode == 200) && ($overview['status']=='ok')) {
+					//iterate over returned data
+					$arr = $overview['links'];
+					foreach($arr as $value) {
+						echo '<tr>';
+						echo '<td>'. $value['url'] . '</td>';
+						echo '<td>'. $value['dest'] . '</td>';
+						echo '<td>'. $value['last_click'][0] . '</td>';
+						echo '<td>'. $value['last_click'][1] . '</td>';
+						echo '<td>'. $value['total_clicks'] . '</td>';
+						echo '<td>'. $value['comment'] . '</td>';
+						echo '</tr>';
+					}
+				}
 			}
-			
-			if($overview['status']=='ok') {
-				?>
-	            <tr>
-	                <th scope="row">Account :</th>
-	                <td>
-	                    <?php echo $overview['account']; ?>
-	                </td>
-	            </tr>
-	            <tr>
-	                <th scope="row">Clicks today:</th>
-	                <td>
-	                    <?php echo $overview['clicks_today']; ?>
-	                </td>
-	            </tr>
-	            <tr>
-	                <th scope="row">Clicks on this month :</th>
-	                <td>
-	                    <?php echo $overview['clicks_month']; ?>
-	                </td>
-	            </tr>
-        		<?php 
-			}
-			else{
-    			?>
-	            <tr>
-	            	<th scope="row">There was a problem! Please check your API Key or wait a few minutes.</th>
-	                
-	            </tr>
-        		<?php 
-        	}   
-        } 
-        
-    ?>
-    </table><br><br>
-    <h4>Don't have a Taveo account? <a href="https://admin.taveo.net/register">Create one for FREE.</h4>
-    </div>
-    <div class="wpseo_content_cell right" id="sidebar-container">
+	    ?>
+	    	</tbody>
+		</table>        
+	    </div> <!-- End container left -->
+	
+	    
+	    <div class="block2" id="sidebar-container">	    	
 			<div id="sidebar">
+		<table class="taveo_table">
+		    <?php
+			if ( !empty( $options )) {
+				//make request to Taveo API server and get response
+				$response = wp_remote_get( add_query_arg( array(
+		    								'apikey' => $options), TAVEO_API_OVERVIEW_URL ), array('sslverify' => TAVEO_SSL_VERIFY) );
+				$rcode = wp_remote_retrieve_response_code( $response );
+				$overview = json_decode( wp_remote_retrieve_body( $response ), true );
+				if ($rcode == 401) {
+				    ?>
+				    <th scope="row">Bad API Key, Enter Correct key in the box to the right! </th>
+					<?php				
+				}
+				else if ($rcode == 429) {
+				    ?>
+				    <th scope="row">Too many requests to the server, please wait a while before continuing... </th>
+					<?php				
+				}
+				else if ($rcode == 500) {
+				    ?>
+				    <th scope="row">Taveo Server Error, try again later </th>
+					<?php				
+				}				
+				else if (!(200 ==  $rcode) ) {
+				    //Error, print what happened
+				    ?>
+				    <th scope="row">Received Error from Taveo Server: <?php echo $overview['msg']; ?></th>
+					<?php
+				}
+				
+				if($overview['status']=='ok') {
+					?>
+					<h3> Account Info </h3>
+		            <tr>
+		                <th scope="row">Account :</th>
+		                <td>
+		                    <?php echo $overview['account']; ?>
+		                </td>
+		            </tr>
+		            <tr>
+		                <th scope="row">Clicks today:</th>
+		                <td>
+		                    <?php echo $overview['clicks_today']; ?>
+		                </td>
+		            </tr>
+		            <tr>
+		                <th scope="row">Clicks on this month :</th>
+		                <td>
+		                    <?php echo $overview['clicks_month']; ?>
+		                </td>
+		            </tr>
+		    		<?php 
+				}
+				else{
+					?>
+		            <tr>
+		            	<th scope="row">There was a problem! Please check your API Key or wait a few minutes.</th>
+		                
+		            </tr>
+		    		<?php 
+		    	}   
+		    } 
+		        
+		    ?>
+	    </table><br><br>				
 				<?php
 							
-
+	
 				$service_banners = array(
 					array(
 						'url' => 'https://taveo.com/link1',
@@ -131,7 +215,7 @@ function taveo_build_config_screen(){ ?>
 						'alt' => 'Website Review banner',
 					),
 				);
-
+	
 				$plugin_banners = array(
 					array(
 						'url' => 'https://taveo.com/link1',
@@ -150,17 +234,17 @@ function taveo_build_config_screen(){ ?>
 					),
 					
 					
-
+	
 				);
-
+	
 								
-
+	
 				shuffle( $service_banners );
 				shuffle( $plugin_banners );
 				$service_banner = $service_banners[0];
-
+	
 				echo '<a target="_blank" href="' . esc_url( $service_banner['url'] ) . '"><img width="261" height="190" src="' . plugins_url( 'images/' . $service_banner['img'], __FILE__ ) . '" alt="' . esc_attr( $service_banner['alt'] ) . '"/></a><br/><br/>';
-
+	
 				$i = 0;
 				foreach ( $plugin_banners as $banner ) {
 					if ( $i == 2 ) {
@@ -173,7 +257,7 @@ function taveo_build_config_screen(){ ?>
 				
 			</div>
 		</div>
-
+	</div>
 </div>
 <?php }
 ?>
