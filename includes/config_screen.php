@@ -236,23 +236,20 @@ function taveo_build_config_screen(){
 	
 				$plugin_banners = array(
 					array(
-						'url' => 'http://taveo.com/link1',
+						'url' => 'https://admin.taveo.net/?nxt=/docs',
 						'img' => 'banner-1.png',
-						'alt' => 'Future Banner 1',
+						'alt' => 'Browse the Taveo Documentation',
 					),
-					array(
-						'url' => 'http://taveo.com/link1',
-						'img' => 'banner-1.png',
-						'alt' => 'Future Banner 2'
-					),
-					array(
-						'url' => 'https://taveo.com/link1',
-						'img' => 'banner-1.png',
-						'alt' => 'Future Banner 3',
-					),
-					
-					
-	
+					//array(
+					//	'url' => 'http://taveo.com/link1',
+					//	'img' => 'banner-1.png',
+					//	'alt' => 'Future Banner 2'
+					//),
+					//array(
+					//	'url' => 'https://taveo.com/link1',
+					//	'img' => 'banner-1.png',
+					//	'alt' => 'Future Banner 3',
+					//),
 				);
 	
 				shuffle( $service_banners );
@@ -261,14 +258,14 @@ function taveo_build_config_screen(){
 				//Future Use
 				//echo '<a target="_blank" href="' . esc_url( $service_banner['url'] ) . '"><img width="261" height="190" src="' . plugins_url( 'images/' . $service_banner['img'], __FILE__ ) . '" alt="' . esc_attr( $service_banner['alt'] ) . '"/></a><br/><br/>';
 	
-				//$i = 0;
-				//foreach ( $plugin_banners as $banner ) {
-				//	if ( $i == 2 ) {
-				//		break;
-				//	}
-				//	echo '<a target="_blank" href="' . esc_url( $banner['url'] ) . '"><img width="261" src="' . plugins_url( 'images/' . $banner['img'], __FILE__ ) . '" alt="' . esc_attr( $banner['alt'] ) . '"/></a><br/><br/>';
-				//	$i ++;
-				//}
+				$i = 0;
+				foreach ( $plugin_banners as $banner ) {
+					if ( $i == 2 ) {
+						break;
+					}
+					echo '<a target="_blank" href="' . esc_url( $banner['url'] ) . '"><img width="261" src="' . plugins_url( 'images/' . $banner['img'], __FILE__ ) . '" alt="' . esc_attr( $banner['alt'] ) . '"/></a><br/><br/>';
+					$i ++;
+				}
 				?>
 				
 			</div>
