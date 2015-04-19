@@ -19,7 +19,7 @@ function process_taveo_api_key_option(){
       $taveo_key = sanitize_text_field( $_POST['taveo_api_key'] );
 
    }
-   update_option( 'taveo_api_key',$taveo_key );
+   update_blog_option(null, 'taveo_api_key',$taveo_key );
  
    wp_redirect(  admin_url( 'admin.php?page=taveo_dashboard&settings-updated=1' ) );
    //wp_redirect( admin_url('admin.php?page='.$_GET["page"]. '&settings-updated=1') );
@@ -32,7 +32,12 @@ function process_taveo_api_key_option(){
 //The markup for the plugin settings / dashboard page
 function taveo_build_config_screen(){ 
     //get the older values, wont work the first time
-    $options = get_option( 'taveo_api_key' );
+	if(is_multisite()){
+    	$options = get_blog_option(null, 'taveo_api_key' );
+	}
+	else {
+		$options = get_option('taveo_api_key' );
+	}
 	?>
 	<div class="dashboard">
     <h2>Taveo: Dashboard</h2>
@@ -78,7 +83,7 @@ function taveo_build_config_screen(){
 		</form>	   
 		<hr> 
 		<h2 class="text-center"> Your Taveo Links </h2>
-		<table id="taveo_links" class="display" cellspacing="0">
+		<table id="taveo_links" class="display text-center" cellspacing="0">
 			<thead>
 		        <tr>
 		            <th>URL</th>
@@ -125,7 +130,7 @@ function taveo_build_config_screen(){
 					foreach($arr as $value) {
 						echo '<tr>';
 						echo '<td>'. $value['url'] . '</td>';
-						echo '<td>'. $value['dest'] . '</td>';
+						echo '<td title="'. $value['dest'] .'">'. $value['dest'] . '</td>';
 						echo '<td>'. $value['last_click'][0] . '</td>';
 						echo '<td>'. $value['last_click'][1] . '</td>';
 						echo '<td>'. $value['total_clicks'] . '</td>';
@@ -220,52 +225,50 @@ function taveo_build_config_screen(){
 	    </table><br><br>				
 				<?php
 							
-	
+				//This is for future use
 				$service_banners = array(
 					array(
-						'url' => 'https://taveo.com/link1',
-						'img' => 'banner-1.jpg',
+						'url' => 'http://taveo.com/link1',
+						'img' => 'banner-1.png',
 						'alt' => 'Website Review banner',
 					),
 				);
 	
 				$plugin_banners = array(
 					array(
-						'url' => 'https://taveo.com/link1',
-						'img' => 'banner-2.jpg',
-						'alt' => 'Banner WordPress SEO Premium',
+						'url' => 'http://taveo.com/link1',
+						'img' => 'banner-1.png',
+						'alt' => 'Future Banner 1',
+					),
+					array(
+						'url' => 'http://taveo.com/link1',
+						'img' => 'banner-1.png',
+						'alt' => 'Future Banner 2'
 					),
 					array(
 						'url' => 'https://taveo.com/link1',
-						'img' => 'banner-3.jpg',
-						'alt' => 'Banner WordPress SEO Video SEO extension',
-					),
-					array(
-						'url' => 'https://taveo.com/link1',
-						'img' => 'banner-4.jpg',
-						'alt' => 'Banner WooCommerce SEO plugin',
+						'img' => 'banner-1.png',
+						'alt' => 'Future Banner 3',
 					),
 					
 					
 	
 				);
 	
-								
-	
 				shuffle( $service_banners );
 				shuffle( $plugin_banners );
 				$service_banner = $service_banners[0];
+				//Future Use
+				//echo '<a target="_blank" href="' . esc_url( $service_banner['url'] ) . '"><img width="261" height="190" src="' . plugins_url( 'images/' . $service_banner['img'], __FILE__ ) . '" alt="' . esc_attr( $service_banner['alt'] ) . '"/></a><br/><br/>';
 	
-				echo '<a target="_blank" href="' . esc_url( $service_banner['url'] ) . '"><img width="261" height="190" src="' . plugins_url( 'images/' . $service_banner['img'], __FILE__ ) . '" alt="' . esc_attr( $service_banner['alt'] ) . '"/></a><br/><br/>';
-	
-				$i = 0;
-				foreach ( $plugin_banners as $banner ) {
-					if ( $i == 2 ) {
-						break;
-					}
-					echo '<a target="_blank" href="' . esc_url( $banner['url'] ) . '"><img width="261" src="' . plugins_url( 'images/' . $banner['img'], __FILE__ ) . '" alt="' . esc_attr( $banner['alt'] ) . '"/></a><br/><br/>';
-					$i ++;
-				}
+				//$i = 0;
+				//foreach ( $plugin_banners as $banner ) {
+				//	if ( $i == 2 ) {
+				//		break;
+				//	}
+				//	echo '<a target="_blank" href="' . esc_url( $banner['url'] ) . '"><img width="261" src="' . plugins_url( 'images/' . $banner['img'], __FILE__ ) . '" alt="' . esc_attr( $banner['alt'] ) . '"/></a><br/><br/>';
+				//	$i ++;
+				//}
 				?>
 				
 			</div>

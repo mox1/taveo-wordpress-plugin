@@ -10,11 +10,15 @@ window.taveo_dashboard_ajax = (function(window, document, jQuery) {
         //check if we had a API error or not
         if (app.$dtable.find('tr:last').html() != '') {
         	app.$dtable.DataTable({
+        		"autoWidth": false,
         		"columnDefs": [
+        		               { "width": "22px", "targets": 6 },
+        		               { "width": "75px", "targets": 1 },
+        		               { "className": "taveo_truncate", "targets": 1 },
         		               { "visible": false, "searchable": false ,"targets": 3 },
         		               { "orderData": [3], "targets":[2] },
-        		               { "orderable": false, "targets": [5,6,7] },
-        		               { "width": "22px", "targets": 7 }
+        		               { "orderable": false, "targets": [5,6] }
+
         		],
         		"order" : [[2,"asc"]],
         	}); 

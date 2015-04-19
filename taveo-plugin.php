@@ -92,8 +92,12 @@ function taveo_on_uninstall()
     // that was registered during the uninstall hook.
     if ( __FILE__ != WP_UNINSTALL_PLUGIN )
         return;
-
-    delete_option('taveo_api_key');
+    if(is_multisite()){
+    	delete_option('taveo_api_key');
+    }
+    else {
+    	delete_blog_option(null,'taveo_api_key');
+    }
 
    
 }
@@ -148,8 +152,12 @@ function taveo_enqueue_admin(){
 	wp_enqueue_style('JQUIcss',plugins_url( '/css/jq-ui-min.css', __FILE__ ),array(),TAVEO_PLUGIN_VERSION);
     
 
-    $taveo_api_key=get_option( 'taveo_api_key' );
-    
+	if(is_multisite()){
+    	$taveo_api_key=get_blog_option( null , 'taveo_api_key' );
+	}
+	else {
+		$taveo_api_key=get_option( 'taveo_api_key' );
+	}
 	$data = add_query_arg( array(
 	    'apikey' => $taveo_api_key,
 	    'destination'     => get_pagepost_url()
