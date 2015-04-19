@@ -77,7 +77,7 @@ function taveo_build_config_screen(){
 		    <input name="submit" type="submit" class="button-primary" value="<?php esc_attr_e('Save Changes'); ?>" /> 
 		</form>	   
 		<hr> 
-		<h2 class="text-center"> Your Taveo Link's </h2>
+		<h2 class="text-center"> Your Taveo Links </h2>
 		<table id="taveo_links" class="display" cellspacing="0">
 			<thead>
 		        <tr>
@@ -87,6 +87,7 @@ function taveo_build_config_screen(){
 		            <th></th>
 		            <th>Total Clicks</th>
 		            <th>Comment</th>
+		            <th>&nbsp;</th>
 		        </tr>
 	    	</thead>
 			<tfoot>
@@ -97,6 +98,7 @@ function taveo_build_config_screen(){
 		            <th></th>
 		            <th>Total Clicks</th>
 		            <th>Comment</th>
+		            <th>&nbsp;</th>
 		        </tr>
 	    	</tfoot>    	
 	    	<tbody>
@@ -128,6 +130,10 @@ function taveo_build_config_screen(){
 						echo '<td>'. $value['last_click'][1] . '</td>';
 						echo '<td>'. $value['total_clicks'] . '</td>';
 						echo '<td>'. $value['comment'] . '</td>';
+						echo '<td> <a title="View Stats in Taveo" 
+   									  href="https://admin.taveo.net/linkstats?lid='. $value['id'] . '"
+   									  target="_blank">
+   								<span class="dashicons dashicons-chart-bar"></span></a></td>'; 
 						echo '</tr>';
 					}
 				}
@@ -140,6 +146,7 @@ function taveo_build_config_screen(){
 	    
 	    <div class="block2" id="sidebar-container">	    	
 			<div id="sidebar">
+			<h3 class="text-center">Account Information</h3>
 		<table class="taveo_table">
 		    <?php
 			if ( !empty( $options )) {
@@ -172,7 +179,6 @@ function taveo_build_config_screen(){
 				
 				if($overview['status']=='ok') {
 					?>
-					<h3> Account Info </h3>
 		            <tr>
 		                <th scope="row">Account :</th>
 		                <td>
@@ -186,7 +192,7 @@ function taveo_build_config_screen(){
 		                </td>
 		            </tr>
 		            <tr>
-		                <th scope="row">Clicks on this month :</th>
+		                <th scope="row">Clicks this month :</th>
 		                <td>
 		                    <?php echo $overview['clicks_month']; ?>
 		                </td>
@@ -201,7 +207,14 @@ function taveo_build_config_screen(){
 		            </tr>
 		    		<?php 
 		    	}   
-		    } 
+		    }
+		    else {
+		    	?> 
+		    	<tr>
+		    		<th scope="row">Enter your API key to see account information </th>
+		    	</tr>
+		    	<?php
+		    }
 		        
 		    ?>
 	    </table><br><br>				

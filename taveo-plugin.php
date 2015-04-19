@@ -62,10 +62,6 @@ require( TAVEO_PLUGIN_DIR_PATH . '/includes/config_screen.php' );
 require( TAVEO_PLUGIN_DIR_PATH . '/includes/add_to_taveo.php' );
 
 
-
-add_action('init', 'get_pagepost_url' );
-
-
 function taveo_on_activation()
 {
     if ( ! current_user_can( 'activate_plugins' ) )
@@ -112,10 +108,11 @@ add_action('admin_init', 'taveo_admin_init');
 add_action('admin_menu', 'taveo_admin_menu');
 
 function taveo_admin_init() {
-	wp_register_style('TaveoOptionsCSS',plugins_url( '/css/config_screen.css', __FILE__ ),array(),TAVEO_PLUGIN_VERSION);
+	wp_register_style('JQUIcss',plugins_url( '/css/jq-ui-min.css', __FILE__ ),array(),TAVEO_PLUGIN_VERSION);
+	wp_register_style('TaveoOptionsCSS',plugins_url( '/css/config_screen.css', __FILE__ ),array('wp-jquery-ui-dialog'),TAVEO_PLUGIN_VERSION);
 	wp_register_style('jq-datatablescss',plugins_url( '/css/jq-datatables.css', __FILE__ ),array('wp-jquery-ui-dialog'),TAVEO_PLUGIN_VERSION);
 	wp_register_script('jq-datatablesjs', plugins_url( '/js/jq-datatables.js', __FILE__ ), array( 'jquery'), TAVEO_PLUGIN_VERSION, true );	
-	wp_register_script('TaveoOptionsJS',plugins_url( '/js/config_screen.js', __FILE__ ), array( 'jquery', 'jq-datatablesjs' ), TAVEO_PLUGIN_VERSION, true );
+	wp_register_script('TaveoOptionsJS',plugins_url( '/js/config_screen.js', __FILE__ ), array( 'jquery', 'jquery-ui-tooltip', 'jq-datatablesjs' ), TAVEO_PLUGIN_VERSION, true );
 
 }
 
@@ -129,6 +126,7 @@ function taveo_admin_styles() {
 /*
  * It will be called only on your plugin admin page, enqueue our stylesheet here
  */
+	wp_enqueue_style('JQUIcss');
  	wp_enqueue_style( 'jq-datatablescss' );
 	wp_enqueue_style( 'TaveoOptionsCSS' );
 	wp_enqueue_script('jq-datatablesjs');
@@ -138,14 +136,16 @@ function taveo_admin_styles() {
 
 /* load scripts and do things on our options / Dashboard page */
 function taveo_enqueue_admin(){
-	wp_enqueue_script('jquery-ui-dialog');
+	//wp_enqueue_script('jquery-ui-dialog');
+	//wp_enqueue_script('jquery-ui-tooltip');
 	wp_enqueue_script('jq-impromptujs', plugins_url( '/js/jq-impromptu.min.js', __FILE__ ), array( 'jquery','jquery-ui-core' ), TAVEO_PLUGIN_VERSION, true );
 	wp_enqueue_script('jq-datatablesjs', plugins_url( '/js/jq-datatables.js', __FILE__ ), array( 'jquery'), TAVEO_PLUGIN_VERSION, true );
-	wp_enqueue_script('TaveoMainJS', plugins_url( '/js/taveo.js', __FILE__ ), array( 'jquery','jquery-ui-core' ), TAVEO_PLUGIN_VERSION, true );
+	wp_enqueue_script('TaveoMainJS', plugins_url( '/js/taveo.js', __FILE__ ), array( 'jq-impromptujs','jquery-ui-tooltip' ), TAVEO_PLUGIN_VERSION, true );
 	wp_enqueue_style('wp-jquery-ui-dialog');
 	wp_enqueue_style('jq-impromptucss',plugins_url( '/css/jq-impromptu.min.css', __FILE__ ),array('wp-jquery-ui-dialog'),TAVEO_PLUGIN_VERSION);
 	wp_enqueue_style('jq-datatablescss',plugins_url( '/css/jq-datatables.css', __FILE__ ),array('wp-jquery-ui-dialog'),TAVEO_PLUGIN_VERSION);
 	wp_enqueue_style('TaveoMainCss',plugins_url( '/css/taveo.css', __FILE__ ),array('wp-jquery-ui-dialog'),TAVEO_PLUGIN_VERSION);
+	wp_enqueue_style('JQUIcss',plugins_url( '/css/jq-ui-min.css', __FILE__ ),array(),TAVEO_PLUGIN_VERSION);
     
 
     $taveo_api_key=get_option( 'taveo_api_key' );
@@ -159,7 +159,8 @@ function taveo_enqueue_admin(){
     wp_localize_script('TaveoMainJS', 'taveossdata', array(            
         'api_key_url' => $data,
         'api_key' => $taveo_api_key,
-        'page_permalink' => get_pagepost_url(),
+        'pagepost_id' => get_pagepost_id(),
+    	'pagepost_url' => get_pagepost_url(),
         'create_api_url' => TAVEO_API_CREATE_URL,
         'by_dest_url' => TAVEO_API_BYDEST_URL
     ) );
@@ -190,13 +191,22 @@ add_action('admin_enqueue_scripts', 'taveo_load_stuff');
 /*this function gets added by the "init" hook, so it is available everywhere*/
 function get_pagepost_url(){
 	if(isset($_GET['post'])){
-	   $cep = $_GET['post'];	   
-	   $taveo_url=get_permalink($cep);
-	   return urlencode($taveo_url);
+	   return get_permalink($_GET['post']);
+	 }
+	 else {
+	 	return "ERROR Can't get URL...";
 	 }
 }
+function get_pagepost_id(){
+	if(isset($_GET['post'])){
+		return $_GET['post'];
+	}
+	else {
+		return -1;
+	}
+}
 
-// $taveo_url=taveo_get_post_id();
+
 //Enqueues the scripts
 
 /*add a "settings" link to the plugins page */
