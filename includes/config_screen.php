@@ -19,7 +19,12 @@ function process_taveo_api_key_option(){
       $taveo_key = sanitize_text_field( $_POST['taveo_api_key'] );
 
    }
-   update_blog_option(null, 'taveo_api_key',$taveo_key );
+   if(is_multisite()){
+      update_blog_option(null, 'taveo_api_key',$taveo_key );
+   }
+   else {
+      update_option('taveo_api_key',$taveo_key);
+   }
  
    wp_redirect(  admin_url( 'admin.php?page=taveo_dashboard&settings-updated=1' ) );
    //wp_redirect( admin_url('admin.php?page='.$_GET["page"]. '&settings-updated=1') );

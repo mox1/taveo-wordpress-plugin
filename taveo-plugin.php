@@ -93,10 +93,10 @@ function taveo_on_uninstall()
     if ( __FILE__ != WP_UNINSTALL_PLUGIN )
         return;
     if(is_multisite()){
-    	delete_option('taveo_api_key');
+    	delete_blog_option(null,'taveo_api_key');
     }
     else {
-    	delete_blog_option(null,'taveo_api_key');
+    	delete_option('taveo_api_key');
     }
 
    
