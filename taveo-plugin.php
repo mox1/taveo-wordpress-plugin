@@ -1,9 +1,9 @@
 <?php
 /**
- * Plugin Name: Taveo Link Shortener
+ * Plugin Name: Taveo Click Tracking
  * Plugin URI:  http://admin.taveo.net/extras/wp-plugin.html
- * Description: Provides an easy way to interface your WordPress site with Taveo click analytics.
- * Author:      Taveo
+ * Description: Taveo is a click tracking and URL shortening platform. When you use Taveo short urls, Taveo tracks the number of clicks, their location, language and referrer. This plugin integrates Taveo with Wordpress, allowing 1 click URL shortening and click tracking. ***A Taveo Account is required (Register free at: http://taveo.net) 
+ * Author:      taveo
  * Author URI:  http://taveo.net/
  * Version:     1.0
  * License: 	GPL2
