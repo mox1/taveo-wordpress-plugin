@@ -88,10 +88,6 @@ function taveo_on_uninstall()
         return;
     check_admin_referer( 'bulk-plugins' );
 
-    //if uninstall not called from WordPress exit
-    if ( !defined( 'WP_UNINSTALL_PLUGIN' ) ) 
-        exit();
-
     if(is_multisite()){
     	delete_blog_option(null,'taveo_api_key');
     }
