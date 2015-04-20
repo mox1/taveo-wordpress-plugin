@@ -88,10 +88,10 @@ function taveo_on_uninstall()
         return;
     check_admin_referer( 'bulk-plugins' );
 
-    // Important: Check if the file is the one
-    // that was registered during the uninstall hook.
-    if ( __FILE__ != WP_UNINSTALL_PLUGIN )
-        return;
+    //if uninstall not called from WordPress exit
+    if ( !defined( 'WP_UNINSTALL_PLUGIN' ) ) 
+        exit();
+
     if(is_multisite()){
     	delete_blog_option(null,'taveo_api_key');
     }
